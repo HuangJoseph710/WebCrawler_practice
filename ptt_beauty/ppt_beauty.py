@@ -10,7 +10,7 @@ def download_img(url, save_path):
     print("-"*30)
 
 def main():
-    url="https://www.ptt.cc/bbs/Beauty/M.1696008245.A.892.html"
+    url="https://www.ptt.cc/bbs/Beauty/M.1696171295.A.890.html"
 
     headers = {"Cookie": "over18=1"}
     response = requests.get(url, headers=headers)
@@ -36,10 +36,8 @@ def main():
         if extension in allow_file_name:
             print(f"檔案型態: {extension}")
             print(f"url: {href}")
+            #下載找到的圖片
             download_img(href, f"{dir_name}/{file_name}")
-        
-
-    #下載找到的圖片
 
 if __name__ == "__main__":
     main()
