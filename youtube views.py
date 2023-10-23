@@ -1,16 +1,35 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
 import time
 
 url = "https://www.youtube.com/hashtag/%E6%88%91%E7%9A%84%E4%B8%AD%E5%8E%9F%E6%88%91%E7%B4%80%E9%8C%84/shorts"
 
-driver = webdriver.Chrome()
+options = webdriver.ChromeOptions()
+options.add_argument('user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"')
+options.add_experimental_option('excludeSwitches', ['enable-automation']) #規避監測
+options.add_experimental_option('excludeSwitches', ['enable-logging']) #禁止打印日誌
+#options.add_argument('--headless') #無頭模式
+options.add_argument('--incognito') #無痕模式
+
+driver = webdriver.Chrome(options=options)
 
 driver.get(url)
-time.sleep(5)
+
+try:
+    headline = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "hashtag"))
+    )
+    print(headline.text)
+except:
+    print("未找到headline!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    time.sleep(5)
+    driver.quit()
 
 ###滑到最下面，讓yt載入更多影片
-SCROLL_PAUSE_TIME = 5
+SCROLL_PAUSE_TIME = 2
 
 print("開始捲!!!!!!!!!!!!!!")
 # Get scroll height
@@ -32,14 +51,14 @@ while True:
         break
     last_height = new_height
 
+#用bs4 找出所有影片的標題(title)和觀看次數(view)
+soup = BeautifulSoup(driver.page_source, "html.parser")
+contents = soup.find_all("div", id='dismissible')
+print("共找到",len(contents),"部影片")
 
-
-# headline = driver.find_element(By.ID, 'hashtag').text
-# print(headline)
-
-print("開始找!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-videos = driver.find_elements(By.CSS_SELECTOR, 'span.ytd-video-meta-block')
-for video in videos:
-    print("找到了...")
-    print(video.text)
-print("找完了，一共找到了",len(videos),"個")
+for c in contents:
+    title = c.find("span", id='video-title').text
+    view = c.find("span", class_='inline-metadata-item style-scope ytd-video-meta-block').text
+    print(title)
+    print(view)
+    print("-"*10)
